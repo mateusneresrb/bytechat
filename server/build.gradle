@@ -20,7 +20,7 @@ shadowJar {
         attributes 'Main-Class': 'dev.mateusneres.bytechat.server.ByteChatServer'
     }
 
-    archiveFileName = 'ByteChat-Client.jar'
+    archiveFileName = 'ByteChat-Server.jar'
 }
 
 dependencies {
