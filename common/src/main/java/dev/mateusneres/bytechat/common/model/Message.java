@@ -13,6 +13,6 @@ public class Message {
     private UUID senderUserID;
     private UUID receiverUserID;
     private String text;
-    private Instant date;
+    private long date;
 
 }
