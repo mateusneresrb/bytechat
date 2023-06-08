@@ -54,7 +54,7 @@ public class ServerClientThread implements Runnable {
             }
 
             /* CLOSED CONNECTION */
-            if (e instanceof EOFException) {
+            if (e instanceof EOFException || e instanceof SocketException && e.getMessage().equalsIgnoreCase("Connection reset")) {
                 running = false;
                 serverController.disconnectUser(user);
                 if (user.getUserID() != null)
@@ -100,7 +100,7 @@ public class ServerClientThread implements Runnable {
             Payload<List<UserInfo>> payload = new Payload<>(MessageType.USER_LIST, serverController.getUserInfoList());
             serverController.sendClientMessage(dataOutputStream, gson.toJson(payload));
 
-            sendConsoleMessage("User " + user.getName() + " connected! " + user.getUserID(), Color.GREEN);
+            sendConsoleMessage("User " + user.getName() + " connected! ", Color.GREEN);
             return;
         }
 
