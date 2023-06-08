@@ -6,6 +6,7 @@ import dev.mateusneres.bytechat.common.model.Message;
 import dev.mateusneres.bytechat.common.model.Payload;
 import dev.mateusneres.bytechat.common.model.UserInfo;
 import dev.mateusneres.bytechat.common.utils.GsonUtil;
+import dev.mateusneres.bytechat.server.database.FileStorage;
 import dev.mateusneres.bytechat.server.model.ServerInfo;
 import dev.mateusneres.bytechat.server.model.User;
 import dev.mateusneres.bytechat.server.threads.ServerThread;
@@ -22,12 +23,10 @@ public class ServerController {
 
     private final ServerInfo serverInfo;
     private List<User> userList;
-    private List<Message> tempMessages;
 
     public ServerController(ServerInfo serverInfo) {
         this.serverInfo = serverInfo;
         this.userList = new ArrayList<>();
-        this.tempMessages = new ArrayList<>();
     }
 
     public void initServer(ServerConsoleController serverConsoleController) {
@@ -46,10 +45,10 @@ public class ServerController {
     }
 
     public void onlineUser(User user) {
-        if (userList.stream().noneMatch(user1 -> user1.getUserID().equals(user.getUserID()))) {
-            userList.add(user);
-        }
+        userList.removeIf(user1 -> user1.getUserID().equals(user.getUserID()));
+        userList.add(user);
         updateUserList(user);
+        sendTempMessages(user);
     }
 
     public void disconnectUser(User user) {
@@ -61,12 +60,28 @@ public class ServerController {
         userList.stream().filter(user1 -> user1.getUserID() != user.getUserID()).forEach(this::updateUsersInfo);
     }
 
+    private void sendTempMessages(User user) {
+        FileStorage fileStorage = new FileStorage(user.getUserID());
+        if (!fileStorage.isExists()) return;
+        try {
+            List<Message> tempMessages = fileStorage.getData();
+            tempMessages.forEach(ServerController.this::sendMessageToUser);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void sendMessageToUser(Message message) {
         User user = userList.stream().filter(user1 -> user1.getUserID().equals(message.getReceiverUserID())).findFirst().orElse(null);
         if (user == null) return;
 
         if (user.getSocket() == null) {
-            tempMessages.add(message);
+            FileStorage fileStorage = new FileStorage(message.getReceiverUserID());
+            try {
+                fileStorage.addMessageToData(message);
+            } catch (IOException e) {
+                Logger.getGlobal().severe("Error on save message to file: " + e.getMessage());
+            }
             return;
         }
 

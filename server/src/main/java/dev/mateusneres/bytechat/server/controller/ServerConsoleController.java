@@ -33,7 +33,7 @@ public class ServerConsoleController {
                 serverController.sendAlertAllUsers(command.replace("!alert ", ""));
             }
 
-            serverConsole.printMessage("[SERVER] " + command, Color.BLUE);
+            serverConsole.printMessage( command, Color.YELLOW);
         });
     }
 

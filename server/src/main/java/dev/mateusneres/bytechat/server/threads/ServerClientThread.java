@@ -24,6 +24,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 @RequiredArgsConstructor
@@ -81,18 +82,25 @@ public class ServerClientThread implements Runnable {
                 return;
             }
 
+            Optional<User> optionalUser = serverController.getUserList().stream().filter(user1 -> user1.getName().equalsIgnoreCase(connection.getName())).findFirst();
+            User verifiedUser = optionalUser.orElse(null);
+
+            UUID uuid = UUID.randomUUID();
+            if (verifiedUser != null && verifiedUser.getUserID() != null) {
+                uuid = verifiedUser.getUserID();
+            }
+
             user.getSocket().setSoTimeout(0);
             user.setName(connection.getName());
             user.setAvatarName(connection.getAvatar());
-
-            Optional<User> optionalUser = serverController.getUserList().stream().filter(user1 -> user1.getName().equalsIgnoreCase(connection.getName())).findFirst();
-            optionalUser.ifPresent(value -> user.setUserID(value.getUserID()));
-
+            user.setUserID(uuid);
             serverController.onlineUser(user);
+
             Gson gson = GsonUtil.getBuilderList();
             Payload<List<UserInfo>> payload = new Payload<>(MessageType.USER_LIST, serverController.getUserInfoList());
             serverController.sendClientMessage(dataOutputStream, gson.toJson(payload));
-            sendConsoleMessage("User " + user.getName() + " connected!", Color.GREEN);
+
+            sendConsoleMessage("User " + user.getName() + " connected! " + user.getUserID(), Color.GREEN);
             return;
         }
 
@@ -105,6 +113,7 @@ public class ServerClientThread implements Runnable {
             Message messageData = gson.fromJson(gson.toJson(content), Message.class);
             serverController.sendMessageToUser(messageData);
         }
+
     }
 
     private void closeClientConnection() {
