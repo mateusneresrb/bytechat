@@ -75,6 +75,7 @@ public class ServerController {
                 try {
                     List<Message> tempMessages = fileStorage.getData();
                     tempMessages.forEach(ServerController.this::sendMessageToUser);
+                    fileStorage.deleteFile();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
