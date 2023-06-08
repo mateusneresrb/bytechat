@@ -17,8 +17,8 @@ public class ByteChatClient {
             splash.showSplashScreen();
 
             AtomicInteger progress = new AtomicInteger();
-            //TODO FIX TIMER IN 20
-            Timer timer = new Timer(1, e -> {
+
+            Timer timer = new Timer(20, e -> {
                 splash.setProgress(progress.addAndGet(1));
 
                 if (progress.get() > 100) {
