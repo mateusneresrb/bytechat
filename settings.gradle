@@ -1,0 +1,5 @@
+rootProject.name = 'bytechat'
+
+include 'common'
+include 'server'
+include 'client'

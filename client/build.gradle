@@ -1,0 +1,44 @@
+plugins {
+    id 'java'
+}
+
+group = 'dev.mateusneres.bytechat'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+task runClientMain(type: JavaExec) {
+    group = 'application'
+    description = 'Executes the main class of the ByteChatClient'
+    main = 'dev.mateusneres.bytechat.client.ByteChatClient'
+
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    compileOnly 'org.projectlombok:lombok:1.18.26'
+    annotationProcessor 'org.projectlombok:lombok:1.18.26'
+
+    implementation 'com.google.code.gson:gson:2.10'
+    implementation 'com.formdev:flatlaf:3.1.1'
+    implementation 'com.formdev:flatlaf-intellij-themes:3.1.1'
+    implementation 'com.jgoodies:jgoodies-forms:1.6.0'
+    implementation 'org.swinglabs:swingx:1.6.1'
+    implementation 'com.zaxxer:HikariCP:4.0.3'
+
+    implementation project(':common')
+}
+
+test {
+    useJUnitPlatform()
+}
