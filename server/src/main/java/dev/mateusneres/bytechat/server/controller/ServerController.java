@@ -79,6 +79,20 @@ public class ServerController {
         }
     }
 
+    public void sendAlertAllUsers(String message) {
+        userList.forEach(user -> {
+            if (user.getSocket() == null) return;
+
+            Payload<?> payload = new Payload<>(MessageType.NOTIFICATION, message);
+
+            try {
+                sendClientMessage(user.getOutput(), new Gson().toJson(payload));
+            } catch (IOException e) {
+                Logger.getGlobal().severe("Error on send alert to client: " + e.getMessage());
+            }
+        });
+    }
+
     private void updateUsersInfo(User user) {
         Gson gson = GsonUtil.getBuilderList();
         Payload<?> payload = new Payload<>(MessageType.USER_LIST, getUserInfoList());

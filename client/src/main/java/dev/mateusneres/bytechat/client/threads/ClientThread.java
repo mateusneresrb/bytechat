@@ -91,6 +91,11 @@ public class ClientThread implements Runnable {
             homeController.updateMessageList();
         }
 
+        if (payload.getMessageType() == MessageType.NOTIFICATION) {
+            String notification = gson.fromJson(gson.toJson(content), String.class);
+            JOptionPane.showMessageDialog(homeController.getHomeScreen(), notification, "Notification", JOptionPane.INFORMATION_MESSAGE);
+        }
+
     }
 
     private void updateUserList(List<UserInfo> userInfoList) {
