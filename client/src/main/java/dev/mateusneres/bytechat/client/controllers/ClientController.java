@@ -7,6 +7,7 @@ import dev.mateusneres.bytechat.common.enums.MessageType;
 import dev.mateusneres.bytechat.common.model.Message;
 import dev.mateusneres.bytechat.common.model.Payload;
 import dev.mateusneres.bytechat.common.model.UserInfo;
+import dev.mateusneres.bytechat.common.utils.GsonUtil;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -58,13 +59,14 @@ public class ClientController {
     }
 
     public void sendMessageTo(UUID uuid, String content) {
-        Message message = new Message(userInfo.getUserID(), uuid, content, Instant.now());
+        Message message = new Message(userInfo.getUserID(), uuid, content, Instant.now().toEpochMilli());
         addUsersMessages(message);
 
+        Gson gson = GsonUtil.getBuilderList();
         Payload<?> payload = new Payload<>(MessageType.MESSAGE, message);
 
         try {
-            userDataOutput.writeUTF(new Gson().toJson(payload));
+            userDataOutput.writeUTF(gson.toJson(payload));
         } catch (IOException e) {
             Logger.getGlobal().severe("Error on send server message: " + e.getCause());
         }
