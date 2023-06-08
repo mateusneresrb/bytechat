@@ -14,8 +14,12 @@ import lombok.Data;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Logger;
 
 @Data
@@ -61,14 +65,21 @@ public class ServerController {
     }
 
     private void sendTempMessages(User user) {
-        FileStorage fileStorage = new FileStorage(user.getUserID());
-        if (!fileStorage.isExists()) return;
-        try {
-            List<Message> tempMessages = fileStorage.getData();
-            tempMessages.forEach(ServerController.this::sendMessageToUser);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        Timer timer = new Timer();
+
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                FileStorage fileStorage = new FileStorage(user.getUserID());
+                if (!fileStorage.isExists()) return;
+                try {
+                    List<Message> tempMessages = fileStorage.getData();
+                    tempMessages.forEach(ServerController.this::sendMessageToUser);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }, 3 * 1000);
     }
 
     public void sendMessageToUser(Message message) {
@@ -85,10 +96,11 @@ public class ServerController {
             return;
         }
 
+        Gson gson = GsonUtil.getBuilderList();
         Payload<?> payload = new Payload<>(MessageType.MESSAGE, message);
 
         try {
-            sendClientMessage(user.getOutput(), new Gson().toJson(payload));
+            sendClientMessage(user.getOutput(), gson.toJson(payload));
         } catch (IOException e) {
             Logger.getGlobal().severe("Error on send client message: " + e.getMessage());
         }
